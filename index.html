@@ -25,9 +25,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Kinescope Player -->
-    <script src="https://player.kinescope.io/latest/player.js"></script>
-    
     <style>
         :root {
             --bg: #f2f2f7;
@@ -160,11 +157,47 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         
-        #kinescope-player {
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,122,255,0.9), rgba(88,86,214,0.9));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+            border-radius: 16px;
+        }
+        
+        .video-overlay.hidden {
+            display: none;
+        }
+        
+        iframe {
             width: 100%;
             height: 100%;
             border: none;
             display: block;
+            background: #000;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a1a, #333);
+            border-radius: 16px;
         }
         
         /* Кнопки */
@@ -681,10 +714,6 @@ const KINESCOPE_VIDEOS = {
     'v3_9.mp4': '986UJATg7BdYmxnNEmsj4k'
 };
 
-// Кэш для видео
-const videoCache = new Map();
-let kinescopePlayer = null;
-
 // === ТРЕНИРОВОЧНАЯ ПРОГРАММА ===
 const program = [
     {
@@ -872,79 +901,67 @@ let logs = JSON.parse(localStorage.getItem('magic_gym_logs')) || [];
 let chartObj = null;
 let restTimer = null;
 let restTimeLeft = 0;
-let cachedVideos = JSON.parse(localStorage.getItem('magic_gym_video_cache')) || {};
+let currentVideoId = null;
 
-// === ФУНКЦИИ ДЛЯ ВИДЕО KINESCOPE ===
+// === ФУНКЦИИ ДЛЯ ВИДЕО ===
 
 function getVideoUrl(filename) {
     const videoId = KINESCOPE_VIDEOS[filename];
     if (!videoId) return null;
     
-    // Проверяем кэш
-    if (cachedVideos[videoId]) {
-        return cachedVideos[videoId].url;
-    }
-    
-    return `https://kinescope.io/embed/${videoId}`;
+    // Возвращаем URL для iframe
+    return `https://kinescope.io/embed/${videoId}?autoplay=1&controls=1`;
 }
 
-function loadKinescopeVideo(videoId, autoplay = true) {
-    if (kinescopePlayer) {
-        kinescopePlayer.destroy();
-    }
+function loadVideo(filename) {
+    const videoId = KINESCOPE_VIDEOS[filename];
+    if (!videoId) return;
     
-    const container = document.getElementById('kinescope-player-container');
-    if (!container) return;
+    currentVideoId = videoId;
     
-    // Очищаем контейнер
-    container.innerHTML = '<div id="kinescope-player"></div>';
+    const container = document.getElementById('video-container');
+    const overlay = document.getElementById('video-overlay');
     
-    // Инициализируем плеер
-    kinescopePlayer = new Kinescope.Player('kinescope-player', {
-        videoId: videoId,
-        width: '100%',
-        height: '100%',
-        autoplay: autoplay,
-        controls: true,
-        title: false,
-        ui: 'normal'
-    });
-    
-    // Сохраняем в кэш
-    cacheVideo(videoId);
-    
-    // Обработчики событий
-    kinescopePlayer.on('ready', () => {
-        console.log('Kinescope player ready');
-        showToast('Видео готово к воспроизведению');
-    });
-    
-    kinescopePlayer.on('error', (error) => {
-        console.error('Kinescope error:', error);
-        showToast('Ошибка загрузки видео');
-    });
-    
-    kinescopePlayer.on('end', () => {
-        console.log('Video ended');
-    });
-}
-
-function cacheVideo(videoId) {
-    if (!cachedVideos[videoId]) {
-        cachedVideos[videoId] = {
-            url: `https://kinescope.io/embed/${videoId}`,
-            cachedAt: Date.now()
-        };
+    if (container && overlay) {
+        overlay.classList.add('hidden');
         
-        // Сохраняем в localStorage (ограничиваем размер)
-        const keys = Object.keys(cachedVideos);
-        if (keys.length > 20) {
-            // Удаляем самые старые записи
-            const sorted = keys.sort((a, b) => cachedVideos[a].cachedAt - cachedVideos[b].cachedAt);
-            sorted.slice(0, 5).forEach(key => delete cachedVideos[key]);
+        // Очищаем предыдущее видео
+        container.querySelectorAll('iframe').forEach(iframe => iframe.remove());
+        
+        // Создаем новый iframe
+        const iframe = document.createElement('iframe');
+        iframe.id = 'video-frame';
+        iframe.src = `https://kinescope.io/embed/${videoId}?autoplay=1&controls=1`;
+        iframe.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+        iframe.allowfullscreen = true;
+        
+        container.appendChild(iframe);
+        
+        // Предзагружаем следующее видео
+        preloadNextVideo();
+    }
+}
+
+function preloadNextVideo() {
+    if (curDay && curExIdx < curDay.exercises.length - 1) {
+        const nextEx = curDay.exercises[curExIdx + 1];
+        const nextVideoId = KINESCOPE_VIDEOS[nextEx.video];
+        
+        if (nextVideoId) {
+            // Создаем скрытый iframe для предзагрузки
+            const preloadFrame = document.createElement('iframe');
+            preloadFrame.style.display = 'none';
+            preloadFrame.src = `https://kinescope.io/embed/${nextVideoId}?autoplay=0`;
+            preloadFrame.onload = function() {
+                // Удаляем после загрузки
+                setTimeout(() => {
+                    if (preloadFrame.parentNode) {
+                        preloadFrame.parentNode.removeChild(preloadFrame);
+                    }
+                }, 1000);
+            };
+            document.body.appendChild(preloadFrame);
         }
-        
-        localStorage.setItem('magic_gym_video_cache', JSON.stringify(cachedVideos));
     }
 }
 
@@ -1134,9 +1151,20 @@ function renderExercise() {
             <div class="progress-bar" style="width: ${progress}%"></div>
         </div>
         
-        <div class="video-container">
-            <div id="kinescope-player-container" style="width: 100%; height: 100%;">
-                <div id="kinescope-player"></div>
+        <div class="video-container" id="video-container">
+            <div class="video-overlay" id="video-overlay">
+                <i class="fas fa-play-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h3 style="margin: 0 0 8px 0;">Видео упражнения</h3>
+                <p style="margin: 0 0 16px 0; font-size: 14px; opacity: 0.9;">
+                    Нажмите кнопку для загрузки видео
+                </p>
+                <button onclick="loadVideo('${ex.video}')" 
+                        style="background: #4285F4; color: white; padding: 12px 24px; border-radius: 20px; border: none; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-play"></i> Загрузить и воспроизвести видео
+                </button>
+                <p style="margin-top: 12px; font-size: 12px; opacity: 0.7;">
+                    ID видео: ${videoId}
+                </p>
             </div>
         </div>
         
@@ -1173,12 +1201,12 @@ function renderExercise() {
         </div>
     `;
     
-    // Загружаем видео с автовоспроизведением
-    if (videoId) {
-        setTimeout(() => {
-            loadKinescopeVideo(videoId, true);
-        }, 500);
-    }
+    // Автоматически загружаем видео через 1 секунду
+    setTimeout(() => {
+        if (videoId) {
+            loadVideo(ex.video);
+        }
+    }, 1000);
     
     setTimeout(() => {
         const firstInput = document.getElementById('w-1');
