@@ -1,5 +1,7 @@
-const CACHE_NAME = 'gym-pro-v1.0';
-const BASE_PATH = '/gym-pwa/';
+const CACHE_NAME = 'magic-gym-v1.0';
+const REPO_NAME = 'MagicTrainig';
+const BASE_PATH = `/${REPO_NAME}/`;
+
 const urlsToCache = [
   BASE_PATH,
   BASE_PATH + 'index.html',
@@ -39,29 +41,30 @@ self.addEventListener('activate', event => {
 
 // Перехват запросов
 self.addEventListener('fetch', event => {
-  // Для GitHub Pages учитываем BASE_PATH
   const requestUrl = new URL(event.request.url);
   
+  // Перенаправляем на index.html для навигационных запросов
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match(BASE_PATH + 'index.html')
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          return fetch(event.request);
+        })
+    );
+    return;
+  }
+  
+  // Для других запросов проверяем кэш
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Возвращаем кэшированный ответ, если он есть
         if (cachedResponse) {
           return cachedResponse;
         }
         
-        // Для навигационных запросов возвращаем index.html
-        if (event.request.mode === 'navigate') {
-          return caches.match(BASE_PATH + 'index.html')
-            .then(response => {
-              if (response) {
-                return response;
-              }
-              return fetch(event.request);
-            });
-        }
-        
-        // Иначе делаем сетевой запрос
         return fetch(event.request)
           .then(response => {
             // Кэшируем только успешные ответы
@@ -69,7 +72,6 @@ self.addEventListener('fetch', event => {
               return response;
             }
             
-            // Клонируем ответ
             const responseToCache = response.clone();
             
             caches.open(CACHE_NAME)
@@ -80,9 +82,12 @@ self.addEventListener('fetch', event => {
             return response;
           })
           .catch(() => {
-            // Если сеть недоступна и это HTML, показываем index.html
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match(BASE_PATH + 'index.html');
+            // Для видео файлов возвращаем 404
+            if (event.request.url.includes('/video/')) {
+              return new Response('', {
+                status: 404,
+                statusText: 'Video not found'
+              });
             }
           });
       })
