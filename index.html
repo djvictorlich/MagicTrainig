@@ -594,11 +594,17 @@ const REPO_NAME = 'MagicTrainig';
 const BASE_PATH = `/${REPO_NAME}/`;
 
 // Функция для получения правильного пути
+// Функция для получения правильного пути к видео
 function getAssetPath(filename) {
-    const cacheBuster = Date.now();
-    return `https://raw.githubusercontent.com/djvictorlich/MagicTrainig/main/video/${filename}?v=${cacheBuster}`;
+    // Для локальной разработки
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return `video/${filename}`;
+    }
+    
+    // Для GitHub Pages
+    const repo = window.location.pathname.split('/')[1] || 'MagicTrainig';
+    return `/${repo}/video/${filename}`;
 }
-
 
 // === КОНФИГУРАЦИЯ ТРЕНИРОВОЧНОЙ ПРОГРАММЫ ===
 const program = [
@@ -1319,6 +1325,7 @@ window.addEventListener('load', initApp);
 </script>
 </body>
 </html>
+
 
 
 
