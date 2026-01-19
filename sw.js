@@ -81,15 +81,8 @@ self.addEventListener('fetch', event => {
             
             return response;
           })
-          .catch(() => {
-            // Для видео файлов возвращаем 404
-            if (event.request.url.includes('/video/')) {
-              return new Response('', {
-                status: 404,
-                statusText: 'Video not found'
-              });
-            }
-          });
+         
       })
   );
 });
+
