@@ -156,19 +156,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         
-        .video-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        
         video {
             width: 100%;
             height: 100%;
@@ -466,42 +453,42 @@
             }
         }
         
-        /* Стили для загрузки видео */
+        /* Загрузка видео */
         .video-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
-            z-index: 10;
-            border-radius: 16px;
-        }
-        
-        .video-loading.hidden {
-            display: none;
-        }
-        
-        .cache-progress {
-            width: 80%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-        
-        .cache-progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #007AFF, #34C759);
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.3s ease;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.8);
+        }
+        
+        .video-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .cache-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(52, 199, 89, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 10;
         }
     </style>
 </head>
@@ -515,9 +502,6 @@
             <div style="display: flex; gap: 10px;">
                 <button onclick="syncData()" style="width: auto; padding: 8px 12px; background: rgba(0,122,255,0.1); color: var(--primary);">
                     <i class="fas fa-sync-alt"></i>
-                </button>
-                <button onclick="cacheAllVideos()" style="width: auto; padding: 8px 12px; background: rgba(52,199,89,0.1); color: var(--success);">
-                    <i class="fas fa-download"></i>
                 </button>
             </div>
         </div>
@@ -569,19 +553,6 @@
             <p style="margin: 0; color: var(--text-secondary);">
                 3 тренировки • <span id="weekly-goal">0</span>/12,500 кг общий тоннаж
             </p>
-        </div>
-        
-        <div class="card">
-            <h3 style="margin-top: 0;"><i class="fas fa-video"></i> Видео для офлайн-режима</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 15px;">
-                Кэш видео: <span id="cache-status">Не загружено</span>
-            </p>
-            <button onclick="cacheAllVideos()" class="btn-secondary" style="margin-bottom: 8px;">
-                <i class="fas fa-download"></i> Скачать все видео на телефон
-            </button>
-            <button onclick="clearVideoCache()" style="background: rgba(255,59,48,0.1); color: var(--danger);">
-                <i class="fas fa-trash"></i> Очистить кэш видео
-            </button>
         </div>
     </div>
 
@@ -637,14 +608,9 @@
 </div>
 
 <script>
-// === КОНСТАНТЫ И КОНФИГУРАЦИЯ ===
-const REPO_NAME = 'MagicTraining';
-const CACHE_NAME = 'magic-training-v1';
-const VIDEO_CACHE_NAME = 'magic-training-videos-v1';
-
-// === ВСЕ 23 ВИДЕО НА GOOGLE DRIVE ===
+// === КОНСТАНТЫ ===
 const GOOGLE_DRIVE_IDS = {
-    // === ДЕНЬ 1: Грудь + Спина + Кор ===
+    // ДЕНЬ 1
     'v1_1.mp4': '1yKgdbct34JqWzQurmyf5QzCB_12-NZGZ',
     'v1_2.mp4': '1Il_CErVNAc4yafKH0L40DaPB8E8syIc7',
     'v1_3.mp4': '1Kv40lU-0CIkCcFVe5ysKx7uVMCRdF-7c',
@@ -653,7 +619,7 @@ const GOOGLE_DRIVE_IDS = {
     'v1_6.mp4': '1fshuv4jB807YShc50YOXm2xGgTqob3VD',
     'v1_7.mp4': '1VjPCbKhBf2VHGPs9MfMB-FepB9LXSUl_',
     
-    // === ДЕНЬ 2: Ноги + Кор ===
+    // ДЕНЬ 2
     'v2_1.mp4': '1YlZnZbRpX59EuaHEHKmJSMwr4L65BiRA',
     'v2_2.mp4': '1jPBljZv_4DSrLqAFH8AUyVUWKh-K7UkV',
     'v2_3.mp4': '1EjAUQT-NJ3C0p4D-cm9RvW-svbCBOOm5',
@@ -662,7 +628,7 @@ const GOOGLE_DRIVE_IDS = {
     'v2_6.mp4': '1oKYZwaBTZBl3ENoHrzBMPvyg_aKmNyqh',
     'v2_7.mp4': '1IxzEEbulyvji4ccCrVHUKqVMcUg7cgaQ',
     
-    // === ДЕНЬ 3: Плечи + Руки + Кор ===
+    // ДЕНЬ 3
     'v3_1.mp4': '1Fi01SNHo5i4gkufbYwxgSGYRz6zKH46j',
     'v3_2.mp4': '1nh7eUGeX9F4OVLUhWESUfR3diepZH_h8',
     'v3_3.mp4': '1wuwEOH54NXooGVK_R2aPF-wW1f2MtU5C',
@@ -859,198 +825,17 @@ let curDay = null;
 let curExIdx = 0;
 let logs = JSON.parse(localStorage.getItem('magic_gym_logs')) || [];
 let chartObj = null;
-let cachedVideos = new Set();
 
-// === ЛОКАЛЬНОЕ КЭШИРОВАНИЕ ВИДЕО ===
-
-// Получение ссылки на видео (пробуем сначала локальный кэш)
-function getAssetPath(filename) {
+// === ПРОСТАЯ ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ССЫЛКИ ===
+function getVideoUrl(filename) {
     const fileId = GOOGLE_DRIVE_IDS[filename];
+    if (!fileId) return null;
     
-    if (!fileId) {
-        return getFallbackUrl(filename);
-    }
-    
-    // Проверяем, есть ли видео в локальном кэше
-    if (cachedVideos.has(filename)) {
-        // Используем видео из локального кэша
-        return `/cache/${filename}`;
-    }
-    
-    // Используем Google Drive с автовоспроизведением
-    return `https://drive.google.com/file/d/${fileId}/preview?autoplay=1&mute=1`;
+    // Прямая ссылка для скачивания с Google Drive
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
 
-// Фолбэк URL
-function getFallbackUrl(filename) {
-    const fileId = GOOGLE_DRIVE_IDS[filename];
-    if (fileId) {
-        return `https://drive.google.com/uc?export=download&id=${fileId}`;
-    }
-    return `#video-error`;
-}
-
-// Кэширование всех видео на телефон
-async function cacheAllVideos() {
-    if (!navigator.onLine) {
-        showToast('⚠️ Нет подключения к интернету');
-        return;
-    }
-    
-    showToast('⏳ Начинаем загрузку видео...');
-    
-    const videoFiles = Object.keys(GOOGLE_DRIVE_IDS);
-    const totalVideos = videoFiles.length;
-    let downloaded = 0;
-    
-    // Показываем прогресс
-    const progressBar = document.createElement('div');
-    progressBar.innerHTML = `
-        <div class="video-loading">
-            <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
-            <p>Загрузка видео на телефон...</p>
-            <div class="cache-progress">
-                <div class="cache-progress-bar" id="cache-progress-bar"></div>
-            </div>
-            <p id="cache-progress-text">0/${totalVideos}</p>
-        </div>
-    `;
-    document.body.appendChild(progressBar);
-    
-    try {
-        // Регистрируем специальный маршрут для локальных видео
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({
-                action: 'CACHE_VIDEOS',
-                videos: videoFiles.map(filename => ({
-                    filename,
-                    url: `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_IDS[filename]}`
-                }))
-            });
-        }
-        
-        // Кэшируем каждое видео
-        for (const filename of videoFiles) {
-            const fileId = GOOGLE_DRIVE_IDS[filename];
-            const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-            
-            try {
-                // Загружаем видео
-                const response = await fetch(downloadUrl);
-                if (response.ok) {
-                    const blob = await response.blob();
-                    
-                    // Сохраняем в локальное хранилище
-                    await saveVideoToCache(filename, blob);
-                    cachedVideos.add(filename);
-                    downloaded++;
-                    
-                    // Обновляем прогресс
-                    const progress = (downloaded / totalVideos * 100).toFixed(0);
-                    document.getElementById('cache-progress-bar').style.width = `${progress}%`;
-                    document.getElementById('cache-progress-text').textContent = 
-                        `${downloaded}/${totalVideos}`;
-                    
-                    showToast(`Загружено: ${downloaded}/${totalVideos}`);
-                }
-            } catch (error) {
-                console.error(`Ошибка загрузки ${filename}:`, error);
-            }
-            
-            // Пауза между загрузками
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        // Сохраняем список кэшированных видео
-        localStorage.setItem('cached_videos', JSON.stringify(Array.from(cachedVideos)));
-        
-        // Обновляем статус
-        updateCacheStatus();
-        
-        // Показываем результат
-        document.body.removeChild(progressBar);
-        showToast(`✅ Загружено ${downloaded} видео на телефон`);
-        
-    } catch (error) {
-        console.error('Ошибка кэширования:', error);
-        document.body.removeChild(progressBar);
-        showToast('❌ Ошибка загрузки видео');
-    }
-}
-
-// Сохранение видео в локальный кэш
-async function saveVideoToCache(filename, blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = function() {
-            try {
-                localStorage.setItem(`video_${filename}`, reader.result);
-                resolve();
-            } catch (error) {
-                reject(error);
-            }
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
-
-// Загрузка видео из локального кэша
-function getVideoFromCache(filename) {
-    try {
-        const videoData = localStorage.getItem(`video_${filename}`);
-        if (videoData) {
-            return videoData;
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки из кэша:', error);
-    }
-    return null;
-}
-
-// Очистка кэша видео
-async function clearVideoCache() {
-    if (confirm('Очистить все скачанные видео с телефона?')) {
-        try {
-            // Удаляем из localStorage
-            for (const filename of Object.keys(GOOGLE_DRIVE_IDS)) {
-                localStorage.removeItem(`video_${filename}`);
-            }
-            localStorage.removeItem('cached_videos');
-            
-            // Очищаем кэш Service Worker
-            if ('caches' in window) {
-                await caches.delete(VIDEO_CACHE_NAME);
-            }
-            
-            cachedVideos.clear();
-            updateCacheStatus();
-            
-            showToast('✅ Кэш видео очищен');
-        } catch (error) {
-            console.error('Ошибка очистки кэша:', error);
-            showToast('❌ Ошибка очистки кэша');
-        }
-    }
-}
-
-// Обновление статуса кэша
-function updateCacheStatus() {
-    try {
-        const cached = JSON.parse(localStorage.getItem('cached_videos')) || [];
-        cachedVideos = new Set(cached);
-        const status = document.getElementById('cache-status');
-        if (status) {
-            status.textContent = cached.length > 0 ? 
-                `${cached.length} видео загружено` : 
-                'Не загружено';
-        }
-    } catch (error) {
-        console.error('Ошибка обновления статуса:', error);
-    }
-}
-
-// === ОСНОВНЫЕ ФУНКЦИИ ПРИЛОЖЕНИЯ ===
+// === ОСНОВНЫЕ ФУНКЦИИ ===
 
 // Показать/скрыть экран
 function showScreen(id) {
@@ -1061,7 +846,6 @@ function showScreen(id) {
     if(id === 'home') {
         document.querySelectorAll('.nav-item')[0].classList.add('active');
         setTimeout(calculateDayProgress, 50);
-        updateCacheStatus();
     }
     if(id === 'stats') { 
         document.querySelectorAll('.nav-item')[1].classList.add('active'); 
@@ -1080,15 +864,14 @@ function startWorkout(dayIdx) {
     showToast(`Начата ${curDay.day.split(':')[0]}`);
 }
 
-// Отрисовка упражнения с автовоспроизведением
+// Отрисовка упражнения
 function renderExercise() {
     const ex = curDay.exercises[curExIdx];
     const isLast = curExIdx === curDay.exercises.length - 1;
     const progress = ((curExIdx + 1) / curDay.exercises.length * 100).toFixed(0);
     
-    const videoUrl = getAssetPath(ex.video);
-    const fileId = GOOGLE_DRIVE_IDS[ex.video];
-    const isCached = cachedVideos.has(ex.video);
+    const videoUrl = getVideoUrl(ex.video);
+    const driveViewUrl = `https://drive.google.com/file/d/${GOOGLE_DRIVE_IDS[ex.video]}/view`;
     
     let setsHtml = '';
     for(let i = 1; i <= 4; i++) {
@@ -1134,44 +917,17 @@ function renderExercise() {
         </div>
         
         <div class="video-container">
-            ${isCached ? `
-                <video 
-                    id="exercise-video"
-                    autoplay
-                    muted
-                    loop
-                    controls
-                    playsinline
-                    style="width: 100%; height: 100%;"
-                    onloadeddata="handleVideoLoaded(this)"
-                    onerror="handleVideoError('${ex.video}')">
-                    <source src="${getVideoFromCache(ex.video)}" type="video/mp4">
-                </video>
-            ` : `
-                <iframe 
-                    id="exercise-video"
-                    src="${videoUrl}"
-                    frameborder="0" 
-                    allow="autoplay; encrypted-media; fullscreen" 
-                    allowfullscreen
-                    style="width: 100%; height: 100%; border-radius: 16px;"
-                    onload="handleVideoLoaded(this)"
-                    onerror="handleVideoError('${ex.video}')">
-                </iframe>
-            `}
-        </div>
-        
-        <div style="display: flex; justify-content: center; gap: 10px; margin: 10px 0;">
-            <button onclick="openVideoInNewTab('${ex.video}')" 
-                    style="background: rgba(66, 133, 244, 0.1); color: #4285F4; padding: 8px 16px; border-radius: 20px; border: none; font-size: 14px; cursor: pointer;">
-                <i class="fab fa-google-drive"></i> Открыть в Google Drive
-            </button>
-            ${!isCached ? `
-                <button onclick="cacheSingleVideo('${ex.video}')" 
-                        style="background: rgba(52, 199, 89, 0.1); color: #34C759; padding: 8px 16px; border-radius: 20px; border: none; font-size: 14px; cursor: pointer;">
-                    <i class="fas fa-download"></i> Скачать на телефон
+            <div class="video-error">
+                <i class="fas fa-video" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h3 style="margin: 0 0 8px 0;">Видео в приложении</h3>
+                <p style="margin: 0 0 16px 0; font-size: 14px; opacity: 0.9;">
+                    Нажмите кнопку ниже, чтобы посмотреть видео
+                </p>
+                <button onclick="window.open('${driveViewUrl}', '_blank')" 
+                        style="background: #4285F4; color: white; padding: 12px 24px; border-radius: 20px; border: none; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    <i class="fab fa-google-drive"></i> Смотреть видео в Google Drive
                 </button>
-            ` : ''}
+            </div>
         </div>
         
         <div class="card">
@@ -1200,65 +956,6 @@ function renderExercise() {
         const firstInput = document.getElementById('w-1');
         if (firstInput) firstInput.focus();
     }, 300);
-}
-
-// Кэширование одного видео
-async function cacheSingleVideo(filename) {
-    if (!navigator.onLine) {
-        showToast('⚠️ Нет подключения к интернету');
-        return;
-    }
-    
-    showToast('⏳ Загружаем видео...');
-    
-    const fileId = GOOGLE_DRIVE_IDS[filename];
-    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    
-    try {
-        const response = await fetch(downloadUrl);
-        if (response.ok) {
-            const blob = await response.blob();
-            await saveVideoToCache(filename, blob);
-            cachedVideos.add(filename);
-            
-            // Сохраняем список
-            localStorage.setItem('cached_videos', JSON.stringify(Array.from(cachedVideos)));
-            updateCacheStatus();
-            
-            // Перезагружаем упражнение для показа локального видео
-            renderExercise();
-            showToast('✅ Видео загружено на телефон');
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки видео:', error);
-        showToast('❌ Ошибка загрузки видео');
-    }
-}
-
-// Обработка загрузки видео
-function handleVideoLoaded(videoElement) {
-    // Автовоспроизведение для локальных видео
-    if (videoElement.tagName === 'VIDEO') {
-        videoElement.play().catch(e => {
-            console.log('Автовоспроизведение заблокировано:', e);
-        });
-    }
-}
-
-// Обработка ошибок видео
-function handleVideoError(filename) {
-    console.error('Ошибка загрузки видео:', filename);
-    showToast('Ошибка загрузки видео');
-}
-
-// Открыть видео в новой вкладке
-function openVideoInNewTab(filename) {
-    const fileId = GOOGLE_DRIVE_IDS[filename];
-    if (fileId) {
-        const url = `https://drive.google.com/file/d/${fileId}/view`;
-        window.open(url, '_blank');
-        showToast('Открываем видео в новой вкладке');
-    }
 }
 
 // Сохранение упражнения
@@ -1318,7 +1015,6 @@ function confirmExit() {
 function syncData() {
     showToast('Данные обновлены');
     calculateDayProgress();
-    updateCacheStatus();
 }
 
 // Уведомления
@@ -1589,10 +1285,6 @@ function initChart() {
 
 // Инициализация приложения
 function initApp() {
-    // Загружаем список кэшированных видео
-    updateCacheStatus();
-    
-    // Рассчитываем прогресс
     calculateDayProgress();
     
     // Регистрация Service Worker
@@ -1610,17 +1302,6 @@ function initApp() {
     setTimeout(() => {
         if (logs.length === 0) {
             showToast('👋 Добро пожаловать! Начните первую тренировку');
-        }
-        
-        // Предлагаем загрузить видео при первом запуске
-        const firstRun = !localStorage.getItem('app_first_run');
-        if (firstRun && navigator.onLine) {
-            localStorage.setItem('app_first_run', 'true');
-            setTimeout(() => {
-                if (confirm('Хотите скачать все видео на телефон для офлайн-режима?')) {
-                    cacheAllVideos();
-                }
-            }, 2000);
         }
     }, 1000);
 }
