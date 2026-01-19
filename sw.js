@@ -5,11 +5,11 @@ const ASSETS = [
   'manifest.json',
   'icon.png',
   // ДЕНЬ 1
-  'videos/v1_1.mp4', 'videos/v1_2.mp4', 'videos/v1_3.mp4', 'videos/v1_4.mp4', 'videos/v1_5.mp4', 'videos/v1_6.mp4', 'videos/v1_7.mp4',
+  'video/v1_1.mp4', 'video/v1_2.mp4', 'video/v1_3.mp4', 'video/v1_4.mp4', 'video/v1_5.mp4', 'video/v1_6.mp4', 'video/v1_7.mp4',
   // ДЕНЬ 2
-  'videos/v2_1.mp4', 'videos/v2_2.mp4', 'videos/v2_3.mp4', 'videos/v2_4.mp4', 'videos/v2_5.mp4', 'videos/v2_6.mp4', 'videos/v2_7.mp4',
+  'video/v2_1.mp4', 'video/v2_2.mp4', 'video/v2_3.mp4', 'video/v2_4.mp4', 'video/v2_5.mp4', 'video/v2_6.mp4', 'video/v2_7.mp4',
   // ДЕНЬ 3
-  'videos/v3_1.mp4', 'videos/v3_2.mp4', 'videos/v3_3.mp4', 'videos/v3_4.mp4', 'videos/v3_5.mp4', 'videos/v3_6.mp4', 'videos/v3_7.mp4', 'videos/v3_8.mp4', 'videos/v3_9.mp4'
+  'video/v3_1.mp4', 'video/v3_2.mp4', 'video/v3_3.mp4', 'video/v3_4.mp4', 'video/v3_5.mp4', 'video/v3_6.mp4', 'video/v3_7.mp4', 'video/v3_8.mp4', 'video/v3_9.mp4'
 ];
 
 // При установке скачиваем всё в кэш
@@ -29,4 +29,5 @@ self.addEventListener('fetch', (event) => {
       return response || fetch(event.request);
     })
   );
+
 });
