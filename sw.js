@@ -13,7 +13,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Проверяем, запрашивается ли видео из папки videos
-  if (url.pathname.includes('/videos/')) {
+  if (url.pathname.includes('/video/')) {
     event.respondWith(handleVideo(event));
   } else {
     event.respondWith(
@@ -55,3 +55,4 @@ async function handleVideo(event) {
 
   return response;
 }
+
