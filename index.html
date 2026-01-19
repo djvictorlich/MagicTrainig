@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gym Pro</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Magic Training</title>
+    <link rel="manifest" href="/MagicTrainig/manifest.json">
     
     <!-- PWA мета-теги для iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Gym Pro">
+    <meta name="apple-mobile-web-app-title" content="Magic Gym">
     <meta name="theme-color" content="#007AFF">
     <meta name="description" content="Профессиональное приложение для тренировок">
     
     <!-- Иконки для iOS -->
-    <link rel="apple-touch-icon" href="icons/icon-152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+    <link rel="apple-touch-icon" href="/MagicTrainig/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/MagicTrainig/icons/icon-180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/MagicTrainig/icons/icon-167.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/MagicTrainig/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/MagicTrainig/icons/icon-120.png">
     
-    <link rel="icon" href="icons/icon-152.png" type="image/png">
+    <link rel="icon" href="/MagicTrainig/icons/icon-152.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Шрифты iOS -->
@@ -589,7 +589,30 @@
 </div>
 
 <script>
-// Конфигурация тренировочной программы
+// === КОНСТАНТЫ И ПУТИ ===
+const REPO_NAME = 'MagicTrainig';
+const BASE_PATH = `/${REPO_NAME}/`;
+
+// Функция для получения правильного пути
+function getAssetPath(relativePath) {
+    // Если путь уже абсолютный
+    if (relativePath.startsWith('http') || relativePath.startsWith('/')) {
+        return relativePath;
+    }
+    
+    // Для PWA (открыто с главного экрана)
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    
+    if (isPWA) {
+        // В PWA используем абсолютные пути
+        return BASE_PATH + relativePath;
+    }
+    
+    // Для обычного браузера - относительные пути
+    return relativePath;
+}
+
+// === КОНФИГУРАЦИЯ ТРЕНИРОВОЧНОЙ ПРОГРАММЫ ===
 const program = [
     {
         day: "ДЕНЬ 1: Грудь + Спина + Кор",
@@ -598,49 +621,49 @@ const program = [
                 name: "Жим в рычажном тренажере Hammer Strength", 
                 tech: "✅ Отрегулируйте сиденье так, чтобы рукоятки были на уровне середины груди (сосков).\n✅ Сведите лопатки вместе и плотно прижмите спину к спинке.\n✅ На выдохе мощно выжмите рукояти вперед.\n❗️ Важно: В конечной точке не выпрямляйте локти до конца («до щелчка»), оставляйте их чуть мягкими, чтобы нагрузка оставалась в мышцах.\n✅ На вдохе медленно верните вес назад, максимально растягивая грудные мышцы.", 
                 volume: "4 подхода по 8–12 повторений", 
-                video: "v1_1.mp4",
+                video: getAssetPath("video/v1_1.mp4"),
                 icon: "fas fa-fire"
             },
             { 
                 name: "Тяга верхнего блока Life Fitness", 
                 tech: "✅ Зафиксируйте ноги валиком. Хват шире плеч.\n✅ Слегка прогните поясницу, грудь смотрит вверх.\n✅ Тяните рукоять к ключицам. Представьте, что тянете не кистями, а локтями вниз.\n✅ В нижней точке пауза на 1 секунду и сильно сожмите лопатки.\n✅ Плавно верните рукоять вверх, растягивая спину.", 
                 volume: "4 подхода по 10–12 повторений", 
-                video: "v1_2.mp4",
+                video: getAssetPath("video/v1_2.mp4"),
                 icon: "fas fa-arrow-down"
             },
             { 
                 name: "Жим гантелей на наклонной скамье", 
                 tech: "✅ Лягте, ноги жестко уприте в пол.\n✅ Поднимите гантели над собой. На вдохе опускайте их к краям грудных мышц.\n✅ Локти должны смотреть не в стороны, а немного вперед (под углом 75° к корпусу).\n✅ Опускайте глубоко, чувствуя растяжение. На выдохе выжмите вверх.", 
                 volume: "3 подхода по 10–12 повторений", 
-                video: "v1_3.mp4",
+                video: getAssetPath("video/v1_3.mp4"),
                 icon: "fas fa-angle-double-up"
             },
             { 
                 name: "Горизонтальная рычажная тяга Hammer", 
                 tech: "✅ Упритесь грудью в подушку. Хват нейтральный.\n✅ Тяните рукояти к поясу. Движение начинается с отведения плеч назад, затем локти.\n✅ В пиковой точке максимально сведите лопатки.\n❗️ Не раскачивайтесь корпусом, работает только спина.", 
                 volume: "3 подхода по 10–12 повторений", 
-                video: "v1_4.mp4",
+                video: getAssetPath("video/v1_4.mp4"),
                 icon: "fas fa-dumbbell"
             },
             { 
                 name: "Сведение рук в тренажере 'Бабочка'", 
                 tech: "✅ Локти держите на уровне плеч и слегка согнутыми.\n✅ На выдохе сводите рукояти перед собой. В момент сведения напрягите грудь на 1 секунду.\n✅ Медленно разводите руки обратно.", 
                 volume: "3 подхода по 12–15 повторений", 
-                video: "v1_5.mp4",
+                video: getAssetPath("video/v1_5.mp4"),
                 icon: "fas fa-compress-alt"
             },
             { 
                 name: "Скручивания (пресс)", 
                 tech: "✅ Округляйте спину, скручивайтесь в 'улитку'.\n✅ Не поднимайтесь с прямой спиной.", 
                 volume: "3 подхода по 15–20 раз", 
-                video: "v1_6.mp4",
+                video: getAssetPath("video/v1_6.mp4"),
                 icon: "fas fa-running"
             },
             { 
                 name: "Планка", 
                 tech: "✅ Упор на локти и носки. Тело прямое как доска.", 
                 volume: "3 подхода по 60 секунд", 
-                video: "v1_7.mp4",
+                video: getAssetPath("video/v1_7.mp4"),
                 icon: "fas fa-clock"
             }
         ]
@@ -652,49 +675,49 @@ const program = [
                 name: "Разгибание ног в тренажере", 
                 tech: "✅ Коленный сустав строго напротив оси вращения тренажера.\n✅ На выдохе полностью выпрямите ноги. В верхней точке задержитесь на 1-2 секунды.\n✅ Медленно опустите.", 
                 volume: "3 подхода по 15 повторений", 
-                video: "v2_1.mp4",
+                video: getAssetPath("video/v2_1.mp4"),
                 icon: "fas fa-angle-up"
             },
             { 
                 name: "Жим ногами", 
                 tech: "✅ Поставьте ноги на ширине плеч.\n✅ На вдохе опускайте платформу глубоко, но следите, чтобы таз не отрывался.\n✅ На выдохе толкайте платформу пятками.\n❗️ Важно: Никогда не выпрямляйте колени полностью!", 
                 volume: "4 подхода по 10–12 повторений", 
-                video: "v2_2.mp4",
+                video: getAssetPath("video/v2_2.mp4"),
                 icon: "fas fa-shoe-prints"
             },
             { 
                 name: "Румынская тяга с гантелями", 
                 tech: "✅ Колени чуть согнуты и зафиксированы.\n✅ Начинайте движение с отведения таза назад. Гантели скользят по ногам.\n✅ Опускайтесь до середины голени. Вы должны чувствовать натяжение под коленями.\n✅ На выдохе вернитесь, сжимая ягодицы.", 
                 volume: "4 подхода по 10–12 повторений", 
-                video: "v2_3.mp4",
+                video: getAssetPath("video/v2_3.mp4"),
                 icon: "fas fa-weight-hanging"
             },
             { 
                 name: "Сгибание ног (бицепс бедра)", 
                 tech: "✅ Прижмите таз к скамье и не отрывайте его.\n✅ Быстро согните ноги, стараясь коснуться ягодиц.\n✅ Медленно (на 3 счета) разогните ноги обратно.", 
                 volume: "3 подхода по 12–15 повторений", 
-                video: "v2_4.mp4",
+                video: getAssetPath("video/v2_4.mp4"),
                 icon: "fas fa-angle-down"
             },
             { 
                 name: "Подъемы на носки", 
                 tech: "✅ Опустите пятки максимально низко, затем поднимите максимально высоко.", 
                 volume: "4 подхода по 15–20 повторений", 
-                video: "v2_5.mp4",
+                video: getAssetPath("video/v2_5.mp4"),
                 icon: "fas fa-arrow-up"
             },
             { 
                 name: "Подъем ног (пресс)", 
                 tech: "✅ В упоре на локтях. Старайтесь подкручивать таз вверх.\n✅ Движения плавные без раскачки.", 
                 volume: "3 подхода по 12–15 раз", 
-                video: "v2_6.mp4",
+                video: getAssetPath("video/v2_6.mp4"),
                 icon: "fas fa-running"
             },
             { 
                 name: "Скручивания", 
                 tech: "✅ Округляйте спину, скручивайтесь в 'улитку'.", 
                 volume: "3 подхода по 15–20 раз", 
-                video: "v2_7.mp4",
+                video: getAssetPath("video/v2_7.mp4"),
                 icon: "fas fa-running"
             }
         ]
@@ -706,95 +729,93 @@ const program = [
                 name: "Жим гантелей сидя (Плечи)", 
                 tech: "✅ Сядьте, плотно прижмитесь спиной. Гантели на уровне ушей.\n✅ Выжмите гантели вверх по дуге, сводя их над головой.\n✅ Плавно опустите до уровня ушей.", 
                 volume: "4 подхода по 8–12 повторений", 
-                video: "v3_1.mp4",
+                video: getAssetPath("video/v3_1.mp4"),
                 icon: "fas fa-angle-double-up"
             },
             { 
                 name: "Разведение гантелей в стороны (Махи)", 
                 tech: "✅ Встаньте прямо, небольшой наклон вперед.\n✅ Поднимайте руки через стороны. Локоть выше кисти, мизинец выше большого пальца.\n✅ Только до параллели с полом.", 
                 volume: "3 подхода по 12–15 повторений", 
-                video: "v3_2.mp4",
+                video: getAssetPath("video/v3_2.mp4"),
                 icon: "fas fa-arrows-alt-h"
             },
             { 
                 name: "Обратные разведения (Задняя дельта)", 
                 tech: "✅ Сядьте лицом к спинке тренажера.\n✅ Отводите прямые руки назад так далеко, как можете.\n✅ Чувствуйте зад плеч, а не спину.", 
                 volume: "3 подхода по 12–15 повторений", 
-                video: "v3_3.mp4",
+                video: getAssetPath("video/v3_3.mp4"),
                 icon: "fas fa-arrow-right"
             },
             { 
                 name: "Разгибание на блоке (Трицепс)", 
                 tech: "✅ Прижмите локти к корпусу.\n✅ Разгибайте руки вниз. В нижней точке разведите концы каната.", 
                 volume: "3 подхода по 12–15 повторений", 
-                video: "v3_4.mp4",
+                video: getAssetPath("video/v3_4.mp4"),
                 icon: "fas fa-angle-down"
             },
             { 
                 name: "Французский жим лежа", 
                 tech: "✅ Сгибайте руки, заводя гриф глубоко за голову.\n✅ Локти смотрят в потолок.\n✅ Почувствуйте растяжение трицепса и выжмите вверх.", 
                 volume: "3 подхода по 10–12 повторений", 
-                video: "v3_5.mp4",
+                video: getAssetPath("video/v3_5.mp4"),
                 icon: "fas fa-weight"
             },
             { 
                 name: "Сгибание рук с супинацией (Бицепс)", 
                 tech: "✅ Начинайте подъем, разворачивая кисть наружу.\n✅ В верхней точке мизинец выше большого пальца.", 
                 volume: "3 подхода по 10–12 повторений", 
-                video: "v3_6.mp4",
+                video: getAssetPath("video/v3_6.mp4"),
                 icon: "fas fa-dumbbell"
             },
             { 
                 name: "Молотки", 
                 tech: "✅ Ладони смотрят друг на друга все время. Без разворота.", 
                 volume: "3 подхода по 10–12 повторений", 
-                video: "v3_7.mp4",
+                video: getAssetPath("video/v3_7.mp4"),
                 icon: "fas fa-hammer"
             },
             { 
                 name: "Русский твист", 
                 tech: "✅ Сидя, ноги на весу, поворачивайте корпус в стороны.", 
                 volume: "3 подхода по 20 раз", 
-                video: "v3_8.mp4",
+                video: getAssetPath("video/v3_8.mp4"),
                 icon: "fas fa-sync-alt"
             },
             { 
                 name: "Молитва на блоке", 
                 tech: "✅ Стоя на коленях, скручивайтесь вниз силой пресса.", 
                 volume: "3 подхода по 15–20 раз", 
-                video: "v3_9.mp4",
+                video: getAssetPath("video/v3_9.mp4"),
                 icon: "fas fa-pray"
             }
         ]
     }
 ];
 
-// Глобальные переменные
+// === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
 let curDay = null;
 let curExIdx = 0;
-let logs = JSON.parse(localStorage.getItem('gym_pro_logs')) || [];
+let logs = JSON.parse(localStorage.getItem('magic_gym_logs')) || [];
 let chartObj = null;
 const MAX_LOG_ENTRIES = 500;
+
+// === ОСНОВНЫЕ ФУНКЦИИ ===
 
 // Функция для расчета прогресса по дням
 function calculateDayProgress() {
     if (logs.length === 0) {
-        // Если нет данных, показываем 0% для всех дней
         updateProgressBars(0, 0, 0);
         updateWeeklyGoal(0);
         return;
     }
     
-    // Получаем упражнения для каждого дня
     const day1Exercises = program[0].exercises.map(e => e.name);
     const day2Exercises = program[1].exercises.map(e => e.name);
     const day3Exercises = program[2].exercises.map(e => e.name);
     
-    // Считаем уникальные тренировки за последние 30 дней
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const recentLogs = logs.filter(log => log.t > thirtyDaysAgo);
     
-    // Группируем логи по дате и упражнению
     const completedByDay = { day1: new Set(), day2: new Set(), day3: new Set() };
     
     recentLogs.forEach(log => {
@@ -812,15 +833,12 @@ function calculateDayProgress() {
         }
     });
     
-    // Рассчитываем проценты
     const day1Percent = Math.min(100, (completedByDay.day1.size / (day1Exercises.length * 4)) * 100);
     const day2Percent = Math.min(100, (completedByDay.day2.size / (day2Exercises.length * 4)) * 100);
     const day3Percent = Math.min(100, (completedByDay.day3.size / (day3Exercises.length * 4)) * 100);
     
-    // Обновляем прогресс-бары
     updateProgressBars(day1Percent, day2Percent, day3Percent);
     
-    // Обновляем цель недели
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const weeklyVolume = logs
         .filter(log => log.t > sevenDaysAgo)
@@ -869,7 +887,6 @@ function showScreen(id) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     if(id === 'home') {
         document.querySelectorAll('.nav-item')[0].classList.add('active');
-        // Рассчитываем прогресс при показе главного экрана
         setTimeout(calculateDayProgress, 50);
     }
     if(id === 'stats') { 
@@ -877,7 +894,6 @@ function showScreen(id) {
         renderStats(); 
     }
     
-    // Прокрутка вверх при смене экрана
     window.scrollTo(0, 0);
 }
 
@@ -895,6 +911,9 @@ function renderExercise() {
     const ex = curDay.exercises[curExIdx];
     const isLast = curExIdx === curDay.exercises.length - 1;
     const progress = ((curExIdx + 1) / curDay.exercises.length * 100).toFixed(0);
+    
+    // Получаем правильный путь к видео
+    const videoPath = ex.video;
     
     let setsHtml = '';
     for(let i = 1; i <= 4; i++) {
@@ -940,9 +959,10 @@ function renderExercise() {
         </div>
         
         <div class="video-container">
-            <video playsinline loop controls preload="metadata" src="video/${ex.video}"
-                onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'padding:40px; text-align:center; color:#999\'><i class=\'fas fa-video-slash\' style=\'font-size:40px; margin-bottom:10px; color:#c7c7cc;\'></i><br>Видео недоступно</div>';"
-                onloadeddata="showToast('Видео загружено')">
+            <video playsinline loop controls preload="metadata" 
+                   src="${videoPath}"
+                   onerror="handleVideoError(this)"
+                   onloadeddata="showToast('Видео загружено')">
             </video>
         </div>
         
@@ -968,11 +988,24 @@ function renderExercise() {
         </div>
     `;
     
-    // Автофокус на первое поле
     setTimeout(() => {
         const firstInput = document.getElementById('w-1');
         if (firstInput) firstInput.focus();
     }, 300);
+}
+
+// Обработка ошибок видео
+function handleVideoError(videoElement) {
+    videoElement.style.display = 'none';
+    const container = videoElement.parentElement;
+    container.innerHTML = `
+        <div style="padding: 60px 20px; text-align: center; color: #999; background: #f2f2f7; border-radius: 16px;">
+            <i class="fas fa-video-slash" style="font-size: 48px; margin-bottom: 16px; color: #c7c7cc;"></i>
+            <h3 style="margin: 0 0 8px 0; color: #666;">Видео недоступно</h3>
+            <p style="margin: 0; font-size: 14px;">Техника выполнения доступна в текстовом формате</p>
+        </div>
+    `;
+    showToast('Видео временно недоступно');
 }
 
 // Сохранить упражнение
@@ -1005,10 +1038,9 @@ function saveEx() {
             s: results,
             totalVolume: results.reduce((sum, s) => sum + s.volume, 0)
         });
-        localStorage.setItem('gym_pro_logs', JSON.stringify(logs));
+        localStorage.setItem('magic_gym_logs', JSON.stringify(logs));
         showToast(`Сохранено: ${ex.name}`);
         
-        // Обновляем прогресс после сохранения
         calculateDayProgress();
     }
     
@@ -1050,7 +1082,7 @@ function showToast(message) {
 function cleanupOldLogs() {
     if (logs.length > MAX_LOG_ENTRIES) {
         logs = logs.slice(logs.length - MAX_LOG_ENTRIES);
-        localStorage.setItem('gym_pro_logs', JSON.stringify(logs));
+        localStorage.setItem('magic_gym_logs', JSON.stringify(logs));
     }
 }
 
@@ -1058,17 +1090,14 @@ function cleanupOldLogs() {
 function renderStats() {
     cleanupOldLogs();
     
-    // Общий тоннаж
     const totalVolume = logs.reduce((sum, log) => sum + (log.totalVolume || 0), 0);
     document.getElementById('total-volume').textContent = `${totalVolume.toFixed(0)} кг`;
     
-    // Список упражнений для графика
     const names = [...new Set(logs.map(l => l.n))];
     const sel = document.getElementById('chart-select');
     sel.innerHTML = '<option value="">Выберите упражнение</option>' + 
         names.map(n => `<option value="${n}">${n}</option>`).join('');
     
-    // История тренировок
     const historyList = document.getElementById('history-list');
     if (logs.length === 0) {
         historyList.innerHTML = `
@@ -1107,7 +1136,6 @@ function renderStats() {
         `).join('');
     }
     
-    // Инициализация графика
     if(names.length > 0) {
         initChart();
     }
@@ -1117,7 +1145,7 @@ function renderStats() {
 function deleteLog(index) {
     if (confirm('Удалить эту запись? Это действие нельзя отменить.')) {
         logs.splice(index, 1);
-        localStorage.setItem('gym_pro_logs', JSON.stringify(logs));
+        localStorage.setItem('magic_gym_logs', JSON.stringify(logs));
         renderStats();
         calculateDayProgress();
         showToast('Запись удалена');
@@ -1128,7 +1156,7 @@ function deleteLog(index) {
 function clearHistory() {
     if (confirm('Вы уверены, что хотите очистить всю историю тренировок?')) {
         logs = [];
-        localStorage.setItem('gym_pro_logs', JSON.stringify(logs));
+        localStorage.setItem('magic_gym_logs', JSON.stringify(logs));
         renderStats();
         calculateDayProgress();
         showToast('История очищена');
@@ -1147,7 +1175,6 @@ function initChart() {
     
     if(chartObj) chartObj.destroy();
     
-    // Подготовка данных
     const dates = filtered.map(f => f.d.split(',')[0]);
     const maxWeights = filtered.map(f => Math.max(...f.s.map(s => s.w)));
     const volumes = filtered.map(f => f.totalVolume || 0);
@@ -1271,10 +1298,14 @@ document.addEventListener('touchend', function(event) {
 
 // Инициализация приложения
 function initApp() {
-    // Рассчитываем прогресс при загрузке
+    // Логирование для отладки
+    console.log('Приложение инициализировано');
+    console.log('Текущий путь:', window.location.pathname);
+    console.log('PWA режим:', window.matchMedia('(display-mode: standalone)').matches);
+    console.log('Standalone:', window.navigator.standalone);
+    
     calculateDayProgress();
     
-    // Показываем приветствие
     if (logs.length === 0) {
         setTimeout(() => {
             showToast('👋 Добро пожаловать! Начните первую тренировку');
@@ -1285,36 +1316,18 @@ function initApp() {
 // Регистрация Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(registration => {
-            console.log('ServiceWorker зарегистрирован:', registration);
-        }).catch(error => {
-            console.log('Ошибка регистрации ServiceWorker:', error);
-        });
+        navigator.serviceWorker.register('/MagicTrainig/sw.js')
+            .then(registration => {
+                console.log('ServiceWorker зарегистрирован:', registration);
+            })
+            .catch(error => {
+                console.log('Ошибка регистрации ServiceWorker:', error);
+            });
     });
 }
 
 // Запуск приложения при загрузке
 window.addEventListener('load', initApp);
-    // Обработка запуска PWA с главного экрана
-if (window.location.hash) {
-    const hash = window.location.hash.substring(1);
-    if (hash === 'workout') {
-        startWorkout(0);
-    } else if (hash === 'stats') {
-        showScreen('stats');
-    }
-}
-
-// Обновляем manifest для GitHub Pages
-if (window.location.hostname.includes('github.io')) {
-    const manifest = document.querySelector('link[rel="manifest"]');
-    if (manifest) {
-        manifest.href = '/gym-pwa/manifest.json';
-    }
-}
 </script>
 </body>
 </html>
-
-
-
