@@ -1,58 +1,132 @@
-const CACHE_NAME = 'gym-cache-v4';
+const CACHE_NAME = 'gym-pro-v1.0';
+const urlsToCache = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+];
 
-// При установке кэшируем только основные файлы
-self.addEventListener('install', (event) => {
+// Установка Service Worker
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(['index.html', 'manifest.json', 'icon.png']);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Кэширование файлов приложения');
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+// Активация Service Worker
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Удаление старого кэша:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
 
-  // Проверяем, запрашивается ли видео из папки videos
-  if (url.pathname.includes('/video/')) {
-    event.respondWith(handleVideo(event));
-  } else {
-    event.respondWith(
-      caches.match(event.request).then((res) => res || fetch(event.request))
-    );
+// Перехват запросов
+self.addEventListener('fetch', event => {
+  // Пропускаем запросы к сторонним ресурсам
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
+  event.respondWith(
+    caches.match(event.request)
+      .then(cachedResponse => {
+        // Возвращаем кэшированный ответ, если он есть
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        
+        // Иначе делаем сетевой запрос
+        return fetch(event.request)
+          .then(response => {
+            // Кэшируем только успешные ответы
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Клонируем ответ, т.к. он может быть использован только один раз
+            const responseToCache = response.clone();
+            
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return response;
+          })
+          .catch(() => {
+            // Если сеть недоступна, показываем fallback
+            if (event.request.mode === 'navigate') {
+              return caches.match('./index.html');
+            }
+          });
+      })
+  );
+});
+
+// Фоновые задачи
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-logs') {
+    event.waitUntil(syncLogs());
   }
 });
 
-async function handleVideo(event) {
-  const cache = await caches.open(CACHE_NAME);
-  let response = await cache.match(event.request);
-
-  if (!response) {
-    // Если видео нет в кэше, скачиваем его
-    response = await fetch(event.request);
-    // Кэшируем копию
-    cache.put(event.request, response.clone());
-  }
-
-  const range = event.request.headers.get('range');
-  if (range) {
-    const buffer = await response.arrayBuffer();
-    const parts = range.replace(/bytes=/, "").split("-");
-    const start = parseInt(parts[0], 10);
-    const end = parts[1] ? parseInt(parts[1], 10) : buffer.byteLength - 1;
-    const chunk = buffer.slice(start, end + 1);
-
-    return new Response(chunk, {
-      status: 206,
-      statusText: 'Partial Content',
-      headers: {
-        'Content-Range': `bytes ${start}-${end}/${buffer.byteLength}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunk.byteLength,
-        'Content-Type': 'video/mp4'
-      }
-    });
-  }
-
-  return response;
+// Функция синхронизации логов
+function syncLogs() {
+  // Здесь можно добавить синхронизацию с сервером
+  return Promise.resolve();
 }
 
+// Push уведомления
+self.addEventListener('push', event => {
+  const options = {
+    body: event.data ? event.data.text() : 'Время тренировки!',
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-72.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    },
+    actions: [
+      {
+        action: 'start',
+        title: 'Начать тренировку',
+        icon: 'icons/dumbbell.png'
+      },
+      {
+        action: 'close',
+        title: 'Закрыть',
+        icon: 'icons/close.png'
+      }
+    ]
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification('Gym Pro', options)
+  );
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  
+  if (event.action === 'start') {
+    event.waitUntil(
+      clients.openWindow('/?start=workout')
+    );
+  }
+});
