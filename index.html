@@ -134,7 +134,7 @@ function renderExercise() {
         <p style="color:var(--gray); margin-bottom:5px;">${curDay.day} • ${curExIdx+1}/${curDay.exercises.length}</p>
         <h1>${ex.name}</h1>
         <div class="video-container">
-            <video playsinline loop controls preload="auto" src="videos/${ex.video}"></video>
+            <video playsinline loop controls preload="auto" src="video/${ex.video}"></video>
         </div>
         <div class="card">
             <div class="tech-text"><b>Объем:</b> ${ex.volume}\n\n${ex.tech}</div>
