@@ -1,33 +1,57 @@
-const CACHE_NAME = 'gym-cache-v3';
-const ASSETS = [
-  '/',
-  'index.html',
-  'manifest.json',
-  'icon.png',
-  // ДЕНЬ 1
-  'video/v1_1.mp4', 'video/v1_2.mp4', 'video/v1_3.mp4', 'video/v1_4.mp4', 'video/v1_5.mp4', 'video/v1_6.mp4', 'video/v1_7.mp4',
-  // ДЕНЬ 2
-  'video/v2_1.mp4', 'video/v2_2.mp4', 'video/v2_3.mp4', 'video/v2_4.mp4', 'video/v2_5.mp4', 'video/v2_6.mp4', 'video/v2_7.mp4',
-  // ДЕНЬ 3
-  'video/v3_1.mp4', 'video/v3_2.mp4', 'video/v3_3.mp4', 'video/v3_4.mp4', 'video/v3_5.mp4', 'video/v3_6.mp4', 'video/v3_7.mp4', 'video/v3_8.mp4', 'video/v3_9.mp4'
-];
+const CACHE_NAME = 'gym-cache-v4';
 
-// При установке скачиваем всё в кэш
+// При установке кэшируем только основные файлы
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Кэшируем видео и контент...');
-      return cache.addAll(ASSETS);
+      return cache.addAll(['index.html', 'manifest.json', 'icon.png']);
     })
   );
 });
 
-// Отдаем файлы из кэша даже если нет сети
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  const url = new URL(event.request.url);
 
+  // Проверяем, запрашивается ли видео из папки videos
+  if (url.pathname.includes('/videos/')) {
+    event.respondWith(handleVideo(event));
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((res) => res || fetch(event.request))
+    );
+  }
 });
+
+async function handleVideo(event) {
+  const cache = await caches.open(CACHE_NAME);
+  let response = await cache.match(event.request);
+
+  if (!response) {
+    // Если видео нет в кэше, скачиваем его
+    response = await fetch(event.request);
+    // Кэшируем копию
+    cache.put(event.request, response.clone());
+  }
+
+  const range = event.request.headers.get('range');
+  if (range) {
+    const buffer = await response.arrayBuffer();
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : buffer.byteLength - 1;
+    const chunk = buffer.slice(start, end + 1);
+
+    return new Response(chunk, {
+      status: 206,
+      statusText: 'Partial Content',
+      headers: {
+        'Content-Range': `bytes ${start}-${end}/${buffer.byteLength}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunk.byteLength,
+        'Content-Type': 'video/mp4'
+      }
+    });
+  }
+
+  return response;
+}
