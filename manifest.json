@@ -2,7 +2,7 @@
   "name": "Gym Pro",
   "short_name": "Gym Pro",
   "description": "Профессиональное приложение для тренировок",
-  "start_url": "/gym-pwa/index.html",
+  "start_url": "/gym-pwa/",
   "scope": "/gym-pwa/",
   "display": "standalone",
   "background_color": "#f2f2f7",
@@ -66,3 +66,4 @@
     }
   ]
 }
+
