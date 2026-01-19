@@ -1296,7 +1296,25 @@ if ('serviceWorker' in navigator) {
 
 // Запуск приложения при загрузке
 window.addEventListener('load', initApp);
+    // Обработка запуска PWA с главного экрана
+if (window.location.hash) {
+    const hash = window.location.hash.substring(1);
+    if (hash === 'workout') {
+        startWorkout(0);
+    } else if (hash === 'stats') {
+        showScreen('stats');
+    }
+}
+
+// Обновляем manifest для GitHub Pages
+if (window.location.hostname.includes('github.io')) {
+    const manifest = document.querySelector('link[rel="manifest"]');
+    if (manifest) {
+        manifest.href = '/gym-pwa/manifest.json';
+    }
+}
 </script>
 </body>
 </html>
+
 
